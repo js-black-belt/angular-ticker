@@ -15,12 +15,41 @@ angular.module('jsbb.angularTicker')
         var registrants = {},
             internalInterval = 1000;
 
+        var tick = function () {
+            angular.forEach(registrants, function (registrant) {
+                // update the delay.
+                registrant.delay -= internalInterval;
+
+                if (registrant.delay <= 0) {
+                    // time to tick!
+                    registrant.tick();
+
+                    //reset delay to configured interval
+                    registrant.delay = registrant.interval;
+                }
+            });
+        };
+
         var start = function () {
-            $interval(service.tick, internalInterval);
-            service.tick();
+            $interval(tick, internalInterval);      // schedule the interval to run the tick every internalInterval
+            tick();                                 // start the first tick
         };
 
         var service = {
+
+            /**
+             *
+             * Register a new task for the TickerSrv to invoke.
+             *
+             * @param id
+             *              The task ID
+             * @param tickHandler
+             *              The task handler function
+             * @param interval
+             *              The interval in which the task will be invoked
+             * @param delay
+             *              The delay until the first invocation
+             */
             register: function (id, tickHandler, interval, delay) {
                 registrants[id] = {
                     tick: tickHandler,        // tick handler function.
@@ -29,24 +58,17 @@ angular.module('jsbb.angularTicker')
                 };
             },
 
+            /**
+             *
+             * Unregister a registered task. It will stop being invoked.
+             *
+             * @param id
+             *            The task ID
+             */
             unregister: function (id) {
                 delete registrants[id];
-            },
-
-            tick: function () {
-                angular.forEach(registrants, function (registrant) {
-                    // update the delay.
-                    registrant.delay -= internalInterval;
-
-                    if (registrant.delay <= 0) {
-                        // time to tick!
-                        registrant.tick();
-
-                        //reset delay to configured interval
-                        registrant.delay = registrant.interval;
-                    }
-                });
             }
+
         };
 
         start();
