@@ -1,12 +1,15 @@
 # angular-ticker
 
-This project is generated with [yo angular generator](https://github.com/yeoman/generator-angular)
-version 0.11.1.
+A simple service that is meant to facilitate repetitive tasks that run every X seconds.
 
-## Build & development
+## How to use
 
-Run `grunt` for building and `grunt serve` for preview.
+Step 1: Install the bower package
 
-## Testing
+`bower install angular-ticker`
+ 
+Step 2: Add the `jsbb.angularTicker` module as a dependency in you angular app module
 
-Running `grunt test` will run the unit tests with karma.
+`angular.module('MyApp', ['jsbb.angularTicker']);`
+ 
+Step 3: Inject the `TickerSrv` into the relevant `Controller`, `Service` or `Directive` and use it
