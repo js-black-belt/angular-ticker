@@ -14,6 +14,7 @@ describe('timing.srv', function () {
 
         spyOn(tickerSrv, 'register').and.callThrough();
         spyOn(tickerSrv, 'unregister').and.callThrough();
+        spyOn(tickerSrv, 'unregisterAll').and.callThrough();
 
         handlers = {
             handler: function () {
@@ -128,6 +129,7 @@ describe('timing.srv', function () {
             expect(handlers.handler).toHaveBeenCalled();
             expect(handlers.handler.calls.count()).toEqual(1);
             expect(handlers.handler2).not.toHaveBeenCalled();
+            expect(tickerSrv.unregisterAll).not.toHaveBeenCalled();
 
             tickerSrv.unregisterAll();
 
@@ -135,6 +137,7 @@ describe('timing.srv', function () {
 
             expect(handlers.handler.calls.count()).toEqual(1);
             expect(handlers.handler2).not.toHaveBeenCalled();
+            expect(tickerSrv.unregisterAll).toHaveBeenCalled();
 
         });
 
