@@ -51,6 +51,15 @@ angular.module('jsbb.angularTicker')
              *              The delay until the first invocation
              */
             register: function (id, tickHandler, interval, delay) {
+
+                if (!interval) {
+                    interval = 1000;
+                }
+
+                if (!delay) {
+                    delay = 0;
+                }
+
                 registrants[id] = {
                     tick: tickHandler,        // tick handler function.
                     interval: interval,       // configured interval.
