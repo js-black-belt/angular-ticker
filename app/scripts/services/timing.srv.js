@@ -15,6 +15,27 @@ angular.module('jsbb.angularTicker')
         var registrants = {},
             internalInterval = 1000;
 
+        var resetRegistrantState = function (registrant) {
+            registrant.delay = registrant.interval;
+            registrant.isPending = false;
+        };
+
+        var handleBlockingTask = function (registrant) {
+            if (!registrant.isPending) {
+                registrant.isPending = true;
+                registrant.tick().then(function () {
+                    resetRegistrantState(registrant);
+                }, function () {
+                    resetRegistrantState(registrant);
+                });
+            }
+        };
+
+        var handleNonBlockingTask = function (registrant) {
+            registrant.tick();
+            resetRegistrantState(registrant);
+        };
+
         var tick = function () {
             angular.forEach(registrants, function (registrant) {
                 // update the delay.
@@ -22,10 +43,16 @@ angular.module('jsbb.angularTicker')
 
                 if (registrant.delay <= 0) {
                     // time to tick!
-                    registrant.tick();
-
-                    //reset delay to configured interval
-                    registrant.delay = registrant.interval;
+                    try {
+                        if (registrant.isBlocking) {
+                            handleBlockingTask(registrant);
+                        } else {
+                            handleNonBlockingTask(registrant);
+                        }
+                    } catch (e) {
+                        console.log(e);
+                        resetRegistrantState(registrant);
+                    }
                 }
             });
         };
@@ -42,28 +69,41 @@ angular.module('jsbb.angularTicker')
              * Register a new task for the TickerSrv to invoke.
              *
              * @param id
-             *              The task ID
+             *              The task ID.
              * @param tickHandler
-             *              The task handler function
+             *              The task handler function. This function should return a promise.
              * @param interval
-             *              The interval in which the task will be invoked
+             *              The interval (ms) in which the task will be invoked.
+             *              Default: 1000
              * @param delay
-             *              The delay until the first invocation
+             *              The delay (ms) until the first invocation.
+             *              Default: 0
+             * @param isBlocking
+             *              Should we wait for the task invocation to complete before invoking it again.
+             *              Default: true
+             *
              */
-            register: function (id, tickHandler, interval, delay) {
+            register: function (id, tickHandler, interval, delay, isBlocking) {
 
-                if (!interval) {
+                if (interval === undefined) {
                     interval = 1000;
                 }
 
-                if (!delay) {
+                if (delay === undefined) {
                     delay = 0;
                 }
 
+                if (isBlocking === undefined) {
+                    isBlocking = true;
+                }
+
                 registrants[id] = {
-                    tick: tickHandler,        // tick handler function.
-                    interval: interval,       // configured interval.
-                    delay: delay              // delay until first tick.
+                    id: id,
+                    tick: tickHandler,
+                    interval: interval,
+                    delay: delay,
+                    isBlocking: isBlocking,
+                    isPending: false             // is the task pending, i.e. waiting to the invocation to complete
                 };
             },
 
@@ -78,7 +118,12 @@ angular.module('jsbb.angularTicker')
                 delete registrants[id];
             },
 
-            unregisterAll: function() {
+            /**
+             *
+             * Unregisters ALL tasks in the tasks registry. A clean slate.
+             *
+             */
+            unregisterAll: function () {
                 registrants = {};
             }
 
