@@ -76,6 +76,10 @@ angular.module('jsbb.angularTicker')
              */
             unregister: function (id) {
                 delete registrants[id];
+            },
+
+            unregisterAll: function() {
+                registrants = {};
             }
 
         };

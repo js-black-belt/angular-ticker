@@ -93,4 +93,50 @@ describe('timing.srv', function () {
         });
     });
 
+    describe('unregister tasks', function() {
+        it('should unregister tasks one by one', function() {
+            tickerSrv.register('task1', handlers.handler);
+            tickerSrv.register('task2', handlers.handler2, 1000, 2001);
+
+            $interval.flush(1001);
+
+            expect(handlers.handler).toHaveBeenCalled();
+            expect(handlers.handler.calls.count()).toEqual(1);
+            expect(handlers.handler2).not.toHaveBeenCalled();
+
+            tickerSrv.unregister('task2');
+
+            $interval.flush(1000);
+
+            expect(handlers.handler.calls.count()).toEqual(2);
+            expect(handlers.handler2).not.toHaveBeenCalled();
+
+            tickerSrv.unregister('task1');
+
+            $interval.flush(1000);
+
+            expect(handlers.handler.calls.count()).toEqual(2);
+            expect(handlers.handler2).not.toHaveBeenCalled();
+        });
+
+        it('should unregister all tasks', function() {
+            tickerSrv.register('task1', handlers.handler);
+            tickerSrv.register('task2', handlers.handler2, 1000, 2001);
+
+            $interval.flush(1001);
+
+            expect(handlers.handler).toHaveBeenCalled();
+            expect(handlers.handler.calls.count()).toEqual(1);
+            expect(handlers.handler2).not.toHaveBeenCalled();
+
+            tickerSrv.unregisterAll();
+
+            $interval.flush(1000);
+
+            expect(handlers.handler.calls.count()).toEqual(1);
+            expect(handlers.handler2).not.toHaveBeenCalled();
+
+        });
+
+    });
 });
