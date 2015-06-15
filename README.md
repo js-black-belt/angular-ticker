@@ -6,9 +6,9 @@ The TickerSrv runs every 1000 ms.
 Task invocation policy is determined per task.
 
 * If the task is configured as `Blocking`, the `TimingSrv` will wait for the invocation to complete before 
-resetting the interval<br> (interval is calculated from the moment the invocation is complete). 
+resetting the interval (interval is calculated from the moment the invocation is complete). 
 
-* If the task is configured as `Non-Blocking`, the `TimingSrv` will not wait for the invocation to complete<br>
+* If the task is configured as `Non-Blocking`, the `TimingSrv` will not wait for the invocation to complete 
 (interval is calculated from the moment the invocation is started). <br>
 *Note, that in this scenario the next invocation might be invoked before the previous one has completed.*
 
