@@ -21,3 +21,7 @@ To register a task:
 To unregister a task:
 
 `TickerSrv.unregister('taskId');`
+
+To unregister all tasks:
+
+`TickerSrv.unregisterAll();`
