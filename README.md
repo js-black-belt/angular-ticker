@@ -75,7 +75,7 @@ To unregister all tasks:
 ### A complete usage example
 
 ```javascript
-angular.module('jsbb.angularTicker', [])
+angular.module('myModule', ['jsbb.angularTicker'])
     .config(function (TickerSrvProvider) {
         TickerSrvProvider.setInterval(500);
     })
