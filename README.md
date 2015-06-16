@@ -1,6 +1,6 @@
 # angular-ticker
 
-A service that is meant to facilitate repetitive tasks that run every X ms.
+A service that is meant to facilitate repetitive tasks that run every X ms.  
 The TickerSrv runs every 1000 ms by default.
 
 Task Invocation Policy is determined per task, and defaults to `Linear`.
@@ -17,22 +17,24 @@ For `Parallel` tasks, the `handlerFunction` return value is ignored so returning
 
 ## Why use it?
 
-The first question you might ask yourself is "Why use it? Why not just use $timeout/$interval?"
+The first question you might ask yourself:  
+> Why use it? 
+> Why not just use $timeout/$interval?  
 
-Well, it is much more than a simple interval ticker.
+Well, it is much more than a simple interval ticker.  
+### The Benefits
+* It is a centralized handling for repetitive tasks  
+* It supports different interval and/or delay per task  
+* It allows control over the Task Invocation Policy (parallel tasks vs. linear tasks) on a per task configuration  
 
-* It is a centralized handling for repetitive tasks
- 
-* It supports different interval and/or delay per task
+### Dependency Injection & Refactoring
+I prefer to inject a service throughout the application and only inject $interval in the service, so
+that if I'll decide to use $timeout or some other facility in the future, the refactoring effort will be minimal and limited to the TickerSrv without any modifications to any of the other code.
 
-* It allows control over the Task Invocation Policy (parallel tasks vs. linear tasks) on a per task configuration
-
-Besides all of the above, I prefer to inject a service throughout the application and only inject $interval in the service, so
-that if I'll decide to use $timeout or some other facility in the future, the refactoring effort will be minimal and limited to the 
-TickerSrv without any modifications to any of the other code.
-
-Another reason is that polling the server with a self invoking $timeout breaks Protractor tests, since it prevents the page 
-from ever fully load. Using this service eliminates the need to consider such issues. 
+### Solving Protractor Issue with timeouts
+Polling the server with a self invoking $timeout breaks Protractor tests, since it prevents the page 
+from ever fully load.  
+Using this service eliminates the need to consider such issues. 
 
 ## Configuration
 
@@ -49,28 +51,24 @@ More configuration options will be added in the future.
 
 ## How to use
 
-Step 1: Install the bower package
-
+### Step 1:  
+Install the bower package  
 `bower install angular-ticker`
  
-Step 2: Add the `jsbb.angularTicker` module as a dependency in you angular app module
+### Step 2:  
+Add the `jsbb.angularTicker` module as a dependency in you angular app module  
+`angular.module('MyApp', ['jsbb.angularTicker']);`  
 
-`angular.module('MyApp', ['jsbb.angularTicker']);`
- 
-Step 3: Inject the `TickerSrv` into the relevant `Controller`, `Service` or `Directive` and use it
+### Step 3: 
+Inject the `TickerSrv` into the relevant `Controller`, `Service` or `Directive` and use it to register a task:  
+`TickerSrv.register('taskId', handlerFunction, interval, delay, isLinear);`   
 
-To register a task:
-
-`TickerSrv.register('taskId', handlerFunction, interval, delay, isLinear);` 
-
-To unregister a task:
-
+## API Methods  
+To unregister a task:  
 `TickerSrv.unregister('taskId');`
 
-To unregister all tasks:
-
-`TickerSrv.unregisterAll();`
-
+To unregister all tasks:  
+`TickerSrv.unregisterAll();`  
 
 ### A complete usage example
 
