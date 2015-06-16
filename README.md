@@ -18,7 +18,7 @@ The `handlerFunction` is expected to return a promise that is resolved or reject
 
 The first question you might ask yourself is "Why use it? Why not just use $timeout/$interval?"
 
-Well, my answer is that it goes way over a simple interval ticker.
+Well, it is much more than a simple interval ticker.
 
 * It is a centralized handling for repetitive tasks
  
