@@ -31,6 +31,9 @@ Besides all of the above, I prefer to inject a service throughout the applicatio
 that if I'll decide to use $timeout or some other facility in the future, the refactoring effort will be minimal and limited to the 
 TickerSrv without any modifications to any of the other code.
 
+Another reason is that polling the server with a self invoking $timeout breaks Protractor tests, since it prevents the page 
+from ever fully load. Using this service eliminates the need to consider such issues. 
+
 ## Configuration
 
 The service is implemented as a provider. You can configure it's internal interval (defaults to 1000ms):
