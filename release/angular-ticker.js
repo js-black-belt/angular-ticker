@@ -22,58 +22,70 @@ angular.module('jsbb.angularTicker', []);
 'use strict';
 
 angular.module('jsbb.angularTicker')
-    .factory('TickerSrv', ['$interval', function ($interval) {
+    .provider('TickerSrv', function () {
         var registrants = {},
             internalInterval = 1000;
 
-        var resetRegistrantState = function (registrant) {
-            registrant.delay = registrant.interval;
-            registrant.isPending = false;
-        };
-
-        var handleBlockingTask = function (registrant) {
-            if (!registrant.isPending) {
-                registrant.isPending = true;
-                registrant.tick().then(function () {
-                    resetRegistrantState(registrant);
-                }, function () {
-                    resetRegistrantState(registrant);
-                });
+        this.setInterval = function (value) {
+            if (!angular.isNumber(value)) {
+                throw new Error('TickerSrv: expected interval to be numeric, got ' + value);
             }
+
+            internalInterval = value;
         };
 
-        var handleNonBlockingTask = function (registrant) {
-            registrant.tick();
-            resetRegistrantState(registrant);
+        this.getInterval = function() {
+            return internalInterval;
         };
 
-        var tick = function () {
-            angular.forEach(registrants, function (registrant) {
-                // update the delay.
-                registrant.delay -= internalInterval;
+        function TickerSrv($interval) {
+            var resetRegistrantState = function (registrant) {
+                registrant.delay = registrant.interval;
+                registrant.isPending = false;
+            };
 
-                if (registrant.delay <= 0) {
-                    // time to tick!
-                    try {
-                        if (registrant.isBlocking) {
-                            handleBlockingTask(registrant);
-                        } else {
-                            handleNonBlockingTask(registrant);
-                        }
-                    } catch (e) {
-                        console.log(e);
+            var handleLinearTask = function (registrant) {
+                if (!registrant.isPending) {
+                    registrant.isPending = true;
+                    registrant.tick().then(function () {
                         resetRegistrantState(registrant);
-                    }
+                    }, function () {
+                        resetRegistrantState(registrant);
+                    });
                 }
-            });
-        };
+            };
 
-        var start = function () {
-            $interval(tick, internalInterval);      // schedule the interval to run the tick every internalInterval
-            tick();                                 // start the first tick
-        };
+            var handleParallelTask = function (registrant) {
+                registrant.tick();
+                resetRegistrantState(registrant);
+            };
 
-        var service = {
+            var tick = function () {
+                angular.forEach(registrants, function (registrant) {
+                    // update the delay.
+                    registrant.delay -= internalInterval;
+
+                    if (registrant.delay <= 0) {
+                        // time to tick!
+                        try {
+                            if (registrant.isLinear) {
+                                handleLinearTask(registrant);
+                            } else {
+                                handleParallelTask(registrant);
+                            }
+                        } catch (e) {
+                            resetRegistrantState(registrant);
+                            throw e;
+                        }
+                    }
+                });
+            };
+
+            var start = function () {
+                $interval(tick, internalInterval);      // schedule the interval to run the tick every internalInterval
+                tick();                                 // start the first tick
+            };
+
 
             /**
              *
@@ -89,12 +101,12 @@ angular.module('jsbb.angularTicker')
              * @param delay
              *              The delay (ms) until the first invocation.
              *              Default: 0
-             * @param isBlocking
+             * @param isLinear
              *              Should we wait for the task invocation to complete before invoking it again.
              *              Default: true
              *
              */
-            register: function (id, tickHandler, interval, delay, isBlocking) {
+            this.register = function (id, tickHandler, interval, delay, isLinear) {
 
                 if (interval === undefined) {
                     interval = 1000;
@@ -104,8 +116,8 @@ angular.module('jsbb.angularTicker')
                     delay = 0;
                 }
 
-                if (isBlocking === undefined) {
-                    isBlocking = true;
+                if (isLinear === undefined) {
+                    isLinear = true;
                 }
 
                 registrants[id] = {
@@ -113,10 +125,10 @@ angular.module('jsbb.angularTicker')
                     tick: tickHandler,
                     interval: interval,
                     delay: delay,
-                    isBlocking: isBlocking,
+                    isLinear: isLinear,
                     isPending: false             // is the task pending, i.e. waiting to the invocation to complete
                 };
-            },
+            };
 
             /**
              *
@@ -125,22 +137,24 @@ angular.module('jsbb.angularTicker')
              * @param id
              *            The task ID
              */
-            unregister: function (id) {
+            this.unregister = function (id) {
                 delete registrants[id];
-            },
+            };
 
             /**
              *
              * Unregisters ALL tasks in the tasks registry. A clean slate.
              *
              */
-            unregisterAll: function () {
+            this.unregisterAll = function () {
                 registrants = {};
-            }
+            };
 
-        };
+            start();
+        }
 
-        start();
+        this.$get = ["$interval", function ($interval) {
+            return new TickerSrv($interval);
+        }];
 
-        return service;
-    }]);
+    });
