@@ -93,11 +93,7 @@ angular.module('myModule', ['jsbb.angularTicker'])
         };
 
         var parallelHandler = function() {
-            var deferred = $q.defer();
             // do something
-            deferred.resolve();
-            return deferred.promise;
-            
         };
 
         // defaults to interval 1000, delay 0, linear Task Invocation Policy
