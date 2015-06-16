@@ -3,7 +3,7 @@
  */
 'use strict';
 
-describe('timing.srv', function () {
+describe('tickerSrv', function () {
 
     var tickerSrv, $interval, $q, handlers;
 
@@ -179,4 +179,5 @@ describe('timing.srv', function () {
         });
 
     });
+
 });
