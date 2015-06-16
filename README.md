@@ -18,7 +18,7 @@ For `Parallel` tasks, the `handlerFunction` return value is ignored so returning
 ## Why use it?
 
 The first question you might ask yourself:  
-> Why use it? 
+> Why use it?  
 > Why not just use $timeout/$interval?  
 
 Well, it is much more than a simple interval ticker.  
