@@ -12,7 +12,8 @@ resetting the interval (interval is calculated from the moment the invocation is
 (interval is calculated from the moment the invocation is started). <br>
 *Note, that in this scenario the next invocation might be invoked before the previous one has completed.*
 
-The `handlerFunction` is expected to return a promise that is resolved or rejected.
+For `Linear` tasks, The `handlerFunction` is expected to return a promise that is resolved or rejected.<br>
+For `Parallel` tasks, the `handlerFunction` return value is ignored so returning a promise is not required. 
 
 ## Why use it?
 

@@ -37,12 +37,16 @@ describe('tickerSrv', function () {
 
                 $interval(f, 2000);
                 return deferred.promise;
+            },
+            handler4: function() {
+
             }
         };
 
         spyOn(handlers, 'handler').and.callThrough();
         spyOn(handlers, 'handler2').and.callThrough();
         spyOn(handlers, 'handler3').and.callThrough();
+        spyOn(handlers, 'handler4').and.callThrough();
     }));
 
     describe('sanity', function () {
@@ -163,19 +167,37 @@ describe('tickerSrv', function () {
             tickerSrv.register('task2', handlers.handler3, 1000, 0, false);
             tickerSrv.register('task1', handlers.handler);
             tickerSrv.register('task3', handlers.handler);
-            tickerSrv.register('task4', handlers.handler);
+            tickerSrv.register('task4', handlers.handler4, 1000, 0, false);
 
             $interval.flush(2001);
-            expect(handlers.handler.calls.count()).toEqual(6);
+            expect(handlers.handler.calls.count()).toEqual(4);
             expect(handlers.handler3.calls.count()).toEqual(2);
+            expect(handlers.handler4.calls.count()).toEqual(2);
 
             $interval.flush(1001);
-            expect(handlers.handler.calls.count()).toEqual(9);
+            expect(handlers.handler.calls.count()).toEqual(6);
+            expect(handlers.handler4.calls.count()).toEqual(3);
 
             $interval.flush(2001);
             expect(handlers.handler3.calls.count()).toEqual(5);
-            expect(handlers.handler.calls.count()).toEqual(15);
+            expect(handlers.handler.calls.count()).toEqual(10);
+            expect(handlers.handler4.calls.count()).toEqual(5);
 
+        });
+
+        it('should allow parallel tasks handler to not return a promise', function() {
+            tickerSrv.register('task4', handlers.handler4, 1000, 0, false);
+
+            $interval.flush(2001);
+            expect(handlers.handler4.calls.count()).toEqual(2);
+        });
+
+        it('should expect linear tasks handler to return a promise', function() {
+            tickerSrv.register('task4', handlers.handler, 1000, 0, true);
+            tickerSrv.register('task5', handlers.handler);
+
+            $interval.flush(2001);
+            expect(handlers.handler.calls.count()).toEqual(4);
         });
 
     });
