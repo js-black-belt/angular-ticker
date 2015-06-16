@@ -79,16 +79,21 @@ angular.module('myModule', ['jsbb.angularTicker'])
     .config(function (TickerSrvProvider) {
         TickerSrvProvider.setInterval(500);
     })
-    .controller('myCtrl', function(TickerSrv, $q, $timeout) {
+    .controller('myCtrl', function(TickerSrv, $q, $http) {
         var linearHandler = function() {
             var deferred = $q.defer();
 
-            // do something async and resolve the deferred when done
-            var f = function() {
+            // do something async and resolve or reject the deferred when done
+            $http.get('someurl').
+                success(function(data) {
+                // do something with the data and resolve the deferred
                 deferred.resolve();
-            };
+                }).
+                error(function(reason) {
+                // do something with the error and reject the deferred
+                deferred.reject();
+                });
 
-            $timeout(f, 2000);
             return deferred.promise;
         };
 
