@@ -38,7 +38,7 @@ Using this service eliminates the need to consider such issues.
 
 ## Configuration
 
-The service is implemented as a provider. You can configure it's internal interval (defaults to 1000ms):
+You can configure the TickerSrv internal interval (defaults to 1000ms) by injecting its provider in the config phase:
 
 ```javascript
 angular.module('jsbb.angularTicker', [])
