@@ -60,10 +60,12 @@ Add the `jsbb.angularTicker` module as a dependency in you angular app module
 `angular.module('MyApp', ['jsbb.angularTicker']);`  
 
 ### Step 3: 
-Inject the `TickerSrv` into the relevant `Controller`, `Service` or `Directive` and use it to register a task:  
-`TickerSrv.register('taskId', handlerFunction, interval, delay, isLinear);`   
+Inject the `TickerSrv` into the relevant `Controller`, `Service` or `Directive` and use it's API.
 
 ## API Methods  
+To register a task:  
+`TickerSrv.register('taskId', handlerFunction, interval, delay, isLinear);`
+
 To unregister a task:  
 `TickerSrv.unregister('taskId');`
 
