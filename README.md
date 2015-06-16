@@ -1,7 +1,7 @@
 # angular-ticker
 
 A service that is meant to facilitate repetitive tasks that run every X ms.  
-The TickerSrv runs every 1000 ms by default.
+The TickerSrv service runs every 1000 ms by default.
 
 Task Invocation Policy is determined per task, and defaults to `Linear`.
 
