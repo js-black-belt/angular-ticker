@@ -63,6 +63,8 @@ Inject the `TickerSrv` into the relevant `Controller`, `Service` or `Directive` 
 
 ## API Methods  
 To register a task:  
+> If not provided, interval defaults to 1000, delay defaults to 0 & isLinear defaults to true  
+
 ```javascript
 TickerSrv.register('taskId', handlerFunction, interval, delay, isLinear);
 ```
