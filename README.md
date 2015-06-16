@@ -54,20 +54,28 @@ Install the bower package
  
 #### Step 2:  
 Add the `jsbb.angularTicker` module as a dependency in you angular app module  
-`angular.module('MyApp', ['jsbb.angularTicker']);`  
+```javascript
+angular.module('MyApp', ['jsbb.angularTicker']);
+```  
 
 #### Step 3: 
 Inject the `TickerSrv` into the relevant `Controller`, `Service` or `Directive` and use it's API.
 
 ## API Methods  
 To register a task:  
-`TickerSrv.register('taskId', handlerFunction, interval, delay, isLinear);`
+```javascript
+TickerSrv.register('taskId', handlerFunction, interval, delay, isLinear);
+```
 
 To unregister a task:  
-`TickerSrv.unregister('taskId');`
+```javascript
+TickerSrv.unregister('taskId');
+```
 
 To unregister all tasks:  
-`TickerSrv.unregisterAll();`  
+```javascript
+TickerSrv.unregisterAll();
+```  
 
 ### A complete usage example
 
