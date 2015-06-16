@@ -6,35 +6,32 @@ The TickerSrv runs every 1000 ms by default.
 Task Invocation Policy is determined per task, and defaults to `Linear`.
 
 * If the task is configured as `Linear`, the `TickerSrv` will wait for the invocation to complete before 
-resetting the interval (interval is calculated from the moment the invocation is complete). 
+resetting the task interval (interval is calculated from the moment the invocation is complete).
 
-* If the task is configured as `Parallel` (Non-Linear), the `TickerSrv` will not wait for the invocation to complete 
-(interval is calculated from the moment the invocation is started). <br>
+* If the task is configured as `Parallel` (Non-Linear), the `TickerSrv` will not wait for the invocation to complete before resetting the task interval (interval is calculated from the moment the invocation is started).  
 *Note, that in this scenario the next invocation might be invoked before the previous one has completed.*
 
-For `Linear` tasks, The `handlerFunction` is expected to return a promise that is resolved or rejected.<br>
+For `Linear` tasks, The `handlerFunction` is expected to return a promise that is resolved or rejected.  
 For `Parallel` tasks, the `handlerFunction` return value is ignored so returning a promise is not required. 
 
 ## Why use it?
 
-The first question you might ask yourself:  
+You are probably asking yourself:  
 > Why use it?  
 > Why not just use $timeout/$interval?  
 
-Well, it is much more than a simple interval ticker.  
-### The Benefits
+Well, the TickerSrv is much more than a simple interval ticker.  
+#### The Benefits
 * It is a centralized handling for repetitive tasks  
 * It supports different interval and/or delay per task  
 * It allows control over the Task Invocation Policy (parallel tasks vs. linear tasks) on a per task configuration  
 
-### Dependency Injection & Refactoring
-I prefer to inject a service throughout the application and only inject $interval in the service, so
-that if I'll decide to use $timeout or some other facility in the future, the refactoring effort will be minimal and limited to the TickerSrv without any modifications to any of the other code.
+#### Dependency Injection & Refactoring
+From an architectural perspective, it is better to inject a service throughout the application and only inject $interval in the service implementation, so that if at some point in the future $interval will have to be replaced with some other facility, the refactoring effort will be minimal and limited to the service without any modifications to the rest of the code.
 
-### Solving Protractor Issue with timeouts
-Polling the server with a self invoking $timeout breaks Protractor tests, since it prevents the page 
-from ever fully load.  
-Using this service eliminates the need to consider such issues. 
+#### Solving Protractor Issue with timeouts
+Polling the server with a self invoking $timeout breaks Protractor tests, since it prevents the page from ever fully load.  
+Using the TickerSrv service eliminates the need to consider such issues. 
 
 ## Configuration
 
@@ -51,15 +48,15 @@ More configuration options will be added in the future.
 
 ## How to use
 
-### Step 1:  
+#### Step 1:  
 Install the bower package  
 `bower install angular-ticker`
  
-### Step 2:  
+#### Step 2:  
 Add the `jsbb.angularTicker` module as a dependency in you angular app module  
 `angular.module('MyApp', ['jsbb.angularTicker']);`  
 
-### Step 3: 
+#### Step 3: 
 Inject the `TickerSrv` into the relevant `Controller`, `Service` or `Directive` and use it's API.
 
 ## API Methods  
@@ -102,10 +99,10 @@ angular.module('myModule', ['jsbb.angularTicker'])
         };
 
         // defaults to interval 1000, delay 0, linear Task Invocation Policy
-        TickerSrv.register('linearTask', linearHandler());
+        TickerSrv.register('linearTask', linearHandler);
         
         // specify custom interval / delay and specify the Task Invocation Policy as parallel
-        TickerSrv.register('parallelTask', parallelHandler(), 2000, 1000, false);
+        TickerSrv.register('parallelTask', parallelHandler, 2000, 1000, false);
         
         // unregister a task
         TickerSrv.unregister('linearTask');
