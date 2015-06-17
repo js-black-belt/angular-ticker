@@ -8,7 +8,20 @@
  *
  * Main module of the application.
  */
-angular.module('jsbb.angularTicker', []);
+angular.module('jsbb.angularTicker', [])
+    .run(["$rootScope", "TickerSrv", function($rootScope, TickerSrv) {
+        // add the register task to the rootScope. This will allow for autoUnregister when the
+        // scope is destroyed to prevent tasks from leaking.
+        $rootScope.registerTickerTask = function(id, tickHandler, interval, delay, isLinear) {
+            TickerSrv.register(id, tickHandler, interval, delay, isLinear);
+
+            this.$on("$destroy", function() {
+                TickerSrv.unregister(id);
+            });
+        };
+
+        $rootScope.unregisterTickerTask = TickerSrv.unregister;
+    }]);
 ;/**
  * Created by sefi on 5/13/14.
  *
@@ -85,7 +98,6 @@ angular.module('jsbb.angularTicker')
                 $interval(tick, internalInterval);      // schedule the interval to run the tick every internalInterval
                 tick();                                 // start the first tick
             };
-
 
             /**
              *
