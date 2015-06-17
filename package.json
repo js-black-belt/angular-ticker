@@ -1,6 +1,6 @@
 {
   "name": "angular-ticker",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "dependencies": {
     "compass": "^0.1.1"
   },
