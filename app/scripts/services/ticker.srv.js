@@ -75,7 +75,6 @@ angular.module('jsbb.angularTicker')
                 tick();                                 // start the first tick
             };
 
-
             /**
              *
              * Register a new task for the TickerSrv to invoke.

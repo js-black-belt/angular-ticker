@@ -5,13 +5,15 @@
 
 describe('tickerSrv', function () {
 
-    var tickerSrv, $interval, $q, handlers;
+    var tickerSrv, $interval, $q, handlers, scope;
 
     beforeEach(module('jsbb.angularTicker'));
-    beforeEach(inject(function (TickerSrv, _$interval_, _$q_) {
+    beforeEach(inject(function ($rootScope, TickerSrv, _$interval_, _$q_) {
         tickerSrv = TickerSrv;
         $interval = _$interval_;
         $q = _$q_;
+
+        scope = $rootScope.$new();
 
         spyOn(tickerSrv, 'register').and.callThrough();
         spyOn(tickerSrv, 'unregister').and.callThrough();
@@ -47,6 +49,8 @@ describe('tickerSrv', function () {
         spyOn(handlers, 'handler2').and.callThrough();
         spyOn(handlers, 'handler3').and.callThrough();
         spyOn(handlers, 'handler4').and.callThrough();
+
+        scope.$digest();
     }));
 
     describe('sanity', function () {
@@ -200,6 +204,47 @@ describe('tickerSrv', function () {
             expect(handlers.handler.calls.count()).toEqual(4);
         });
 
+    });
+
+    describe('scope operations', function() {
+        it('verify scope is configured', function() {
+            expect(scope.registerTickerTask).toBeDefined();
+            expect(scope.unregisterTickerTask).toBeDefined();
+        });
+
+        it('should use scope for registration', function() {
+            scope.registerTickerTask('task1', handlers.handler);
+
+            $interval.flush(2001);
+            expect(handlers.handler.calls.count()).toEqual(2);
+        });
+
+        it('should use scope for unregistration', function() {
+            scope.registerTickerTask('task1', handlers.handler);
+
+            $interval.flush(2001);
+            expect(handlers.handler.calls.count()).toEqual(2);
+
+            scope.unregisterTickerTask('task1');
+
+            $interval.flush(2001);
+            expect(handlers.handler.calls.count()).toEqual(2);
+        });
+
+        it('should stop ticking on scope destroy', function() {
+            scope.registerTickerTask('task1', handlers.handler);
+
+            $interval.flush(2001);
+            expect(handlers.handler.calls.count()).toEqual(2);
+
+            scope.$destroy();
+
+            $interval.flush(2001);
+            expect(handlers.handler.calls.count()).toEqual(2);
+
+            $interval.flush(2001);
+            expect(handlers.handler.calls.count()).toEqual(2);
+        })
     });
 
 });

@@ -33,6 +33,11 @@ From an architectural perspective, it is better to inject a service throughout t
 Polling the server with a self invoking $timeout breaks Protractor tests, since it prevents the page from ever fully load.  
 Using the TickerSrv service eliminates the need to consider such issues. 
 
+#### Auto Unregister tasks
+The TickerSrv service exposes register and unregister methods on the $scope. When using the $scope API, the TickerSrv service detects when 
+the $scope is being destroyed and auto unregisters the task, to prevent tasks from leaking.  
+This frees you from having to unregister tasks manually.
+
 ## Configuration
 
 You can configure the TickerSrv internal interval (defaults to 1000ms) by injecting its provider in the config phase:
@@ -59,9 +64,13 @@ angular.module('MyApp', ['jsbb.angularTicker']);
 ```  
 
 #### Step 3: 
-Inject the `TickerSrv` into the relevant `Controller`, `Service` or `Directive` and use it's API.
+Inject the `TickerSrv` service into the relevant `Controller`, `Service` or `Directive` and use it's API.  
+Alternately, you could use the API exposed on the $scope. Using this API eliminates the need to inject the TickerSrv service  
+as well as provides the task autoUnregister functionality.
 
 ## API Methods  
+
+#### Using the service API
 To register a task:  
 > If not provided, interval defaults to 1000, delay defaults to 0 & isLinear defaults to true  
 
@@ -79,7 +88,23 @@ To unregister all tasks:
 TickerSrv.unregisterAll();
 ```  
 
-### A complete usage example
+#### Using the $scope API
+To register a task:
+> If not provided, interval defaults to 1000, delay defaults to 0 & isLinear defaults to true  
+
+```javascript
+$scope.registerTickerTask('taskId', handlerFunction, interval, delay, isLinear);
+```
+
+To unregister a task:  
+```javascript
+$scope.unregisterTickerTask('taskId');
+```
+
+There is no point in exposing unregisterAll on the $scope. 
+
+## A complete usage example
+#### Using the service API
 
 ```javascript
 angular.module('myModule', ['jsbb.angularTicker'])
@@ -119,5 +144,46 @@ angular.module('myModule', ['jsbb.angularTicker'])
         
         // unregister all tasks
         TickerSrv.unregisterAll();
+    });
+```    
+
+#### Using the scope API
+
+```javascript
+angular.module('myModule', ['jsbb.angularTicker'])
+    .config(function (TickerSrvProvider) {
+        TickerSrvProvider.setInterval(500);
+    })
+    .controller('myCtrl', function($scope, $q, $http) {
+        var linearHandler = function() {
+            var deferred = $q.defer();
+
+            // do something async and resolve or reject the deferred when done
+            $http.get('someurl').
+                success(function(data) {
+                // do something with the data and resolve the deferred
+                deferred.resolve();
+                }).
+                error(function(reason) {
+                // do something with the error and reject the deferred
+                deferred.reject();
+                });
+
+            return deferred.promise;
+        };
+
+        var parallelHandler = function() {
+            // do something
+        };
+
+        // defaults to interval 1000, delay 0, linear Task Invocation Policy
+        $scope.registerTickerTask('linearTask', linearHandler);
+        
+        // specify custom interval / delay and specify the Task Invocation Policy as parallel
+        $scope.registerTickerTask('parallelTask', parallelHandler, 2000, 1000, false);
+        
+        // unregister a task
+        $scope.unregisterTickerTask('linearTask');
+        
     });
 ```    
