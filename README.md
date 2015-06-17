@@ -53,6 +53,10 @@ More configuration options will be added in the future.
 
 ## How to use
 
+See Plunks here:
+> http://plnkr.co/edit/jUljaNTXhm3LJ4gm209f - Shows basic usage of the two APIs.  
+> http://plnkr.co/edit/htpGZuUrqqOFX5xzpHGF - Shows how to config the service provider
+
 #### Step 1:  
 Install the bower package  
 `bower install angular-ticker`
