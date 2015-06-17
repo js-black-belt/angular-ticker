@@ -64,7 +64,8 @@ angular.module('MyApp', ['jsbb.angularTicker']);
 ```  
 
 #### Step 3: 
-Inject the `TickerSrv` service into the relevant `Controller`, `Service` or `Directive` and use it's API.  
+Inject the `TickerSrv` service into the relevant `Controller`, `Service` or `Directive` and use it's API.
+
 Alternately, you could use the API exposed on the $scope. Using this API eliminates the need to inject the TickerSrv service 
 as well as provides the task autoUnregister functionality.
 
@@ -147,7 +148,7 @@ angular.module('myModule', ['jsbb.angularTicker'])
     });
 ```    
 
-#### Using the scope API
+#### Using the $scope API
 
 ```javascript
 angular.module('myModule', ['jsbb.angularTicker'])
