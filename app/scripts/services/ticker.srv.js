@@ -1,3 +1,27 @@
+'use strict';
+
+/**
+ * @ngdoc overview
+ * @name jsbb.angularTicker
+ * @description
+ * # jsbb.angularTicker
+ *
+ * Main module of the application.
+ */
+angular.module('jsbb.angularTicker', [])
+    .run(["$rootScope", "TickerSrv", function ($rootScope, TickerSrv) {
+        // add the register task to the rootScope. This will allow for autoUnregister when the
+        // scope is destroyed to prevent tasks from leaking.
+        $rootScope.registerTickerTask = function (id, tickHandler, interval, delay, isLinear) {
+            TickerSrv.register(id, tickHandler, interval, delay, isLinear);
+
+            this.$on("$destroy", function () {
+                TickerSrv.unregister(id);
+            });
+        };
+
+        $rootScope.unregisterTickerTask = TickerSrv.unregister;
+    }]);
 /**
  * Created by sefi on 5/13/14.
  *
@@ -12,8 +36,7 @@
 
 angular.module('jsbb.angularTicker')
     .provider('TickerSrv', function () {
-        var registrants = {},
-            internalInterval = 1000;
+        var internalInterval = 1000;
 
         this.setInterval = function (value) {
             if (!angular.isNumber(value)) {
@@ -23,58 +46,13 @@ angular.module('jsbb.angularTicker')
             internalInterval = value;
         };
 
-        this.getInterval = function() {
+        this.getInterval = function () {
             return internalInterval;
         };
 
-        function TickerSrv($interval) {
-            var resetRegistrantState = function (registrant) {
-                registrant.delay = registrant.interval;
-                registrant.isPending = false;
-            };
+        var TickerSrv = function ($interval, $q) {
 
-            var handleLinearTask = function (registrant) {
-                if (!registrant.isPending) {
-                    registrant.isPending = true;
-                    registrant.tick().then(function () {
-                        resetRegistrantState(registrant);
-                    }, function () {
-                        resetRegistrantState(registrant);
-                    });
-                }
-            };
-
-            var handleParallelTask = function (registrant) {
-                registrant.tick();
-                resetRegistrantState(registrant);
-            };
-
-            var tick = function () {
-                angular.forEach(registrants, function (registrant) {
-                    // update the delay.
-                    registrant.delay -= internalInterval;
-
-                    if (registrant.delay <= 0) {
-                        // time to tick!
-                        try {
-                            if (registrant.isLinear) {
-                                handleLinearTask(registrant);
-                            } else {
-                                handleParallelTask(registrant);
-                            }
-                        } catch (e) {
-                            resetRegistrantState(registrant);
-                            throw e;
-                        }
-                    }
-                });
-            };
-
-            var start = function () {
-                $interval(tick, internalInterval);      // schedule the interval to run the tick every internalInterval
-                tick();                                 // start the first tick
-            };
-
+            var tasks = {};
             /**
              *
              * Register a new task for the TickerSrv to invoke.
@@ -82,40 +60,41 @@ angular.module('jsbb.angularTicker')
              * @param id
              *              The task ID.
              * @param tickHandler
-             *              The task handler function. This function should return a promise.
+             *              The task handler function. This function could return a promise.
              * @param interval
              *              The interval (ms) in which the task will be invoked.
              *              Default: 1000
              * @param delay
              *              The delay (ms) until the first invocation.
              *              Default: 0
-             * @param isLinear
+             * @param isLinear (DEPRECATED)
              *              Should we wait for the task invocation to complete before invoking it again.
              *              Default: true
              *
              */
             this.register = function (id, tickHandler, interval, delay, isLinear) {
-
-                if (interval === undefined) {
-                    interval = 1000;
-                }
-
-                if (delay === undefined) {
-                    delay = 0;
-                }
-
-                if (isLinear === undefined) {
-                    isLinear = true;
-                }
-
-                registrants[id] = {
-                    id: id,
-                    tick: tickHandler,
-                    interval: interval,
-                    delay: delay,
-                    isLinear: isLinear,
-                    isPending: false             // is the task pending, i.e. waiting to the invocation to complete
-                };
+                tasks[id] = (function (interval, delay) {
+                    var ts = Date.now() + delay, resolved = !0;
+                    return function () {
+                        ((Date.now() - ts) / interval) > 1 && resolved && (function () {
+                            resolved = !!0;
+                            (function (def) {
+                                var res = function () {
+                                    resolved = !0;
+                                    ts = Date.now();
+                                };
+                                def.resolve();
+                                def
+                                    .promise
+                                    .then(tickHandler)
+                                    .then(res, function (e) {
+                                        res();
+                                        throw(e);
+                                    });
+                            })($q.defer());
+                        })();
+                    };
+                })(interval || 1000, delay || 0);
             };
 
             /**
@@ -126,7 +105,7 @@ angular.module('jsbb.angularTicker')
              *            The task ID
              */
             this.unregister = function (id) {
-                delete registrants[id];
+                delete tasks[id];
             };
 
             /**
@@ -135,14 +114,18 @@ angular.module('jsbb.angularTicker')
              *
              */
             this.unregisterAll = function () {
-                registrants = {};
+                tasks = {};
             };
 
-            start();
-        }
-
-        this.$get = function ($interval) {
-            return new TickerSrv($interval);
+            $interval(function () {
+                Object.keys(tasks).forEach(function (key) {
+                    tasks[key].call();
+                });
+            }, internalInterval);
         };
+
+        this.$get = ["$interval", "$q", function ($interval, $q) {
+            return new TickerSrv($interval, $q);
+        }];
 
     });
