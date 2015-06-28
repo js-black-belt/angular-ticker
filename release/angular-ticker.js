@@ -22,6 +22,8 @@ angular.module('jsbb.angularTicker', [])
 
         $rootScope.unregisterTickerTask = TickerSrv.unregister;
 
+        // since isolated scopes do not inherit prototypically from rootScope, we need to override $new
+        // and add the functionality manually.
         $rootScope.$origNew = $rootScope.$new;
 
         $rootScope.$new = function(isolate, parent) {
