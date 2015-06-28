@@ -15,12 +15,25 @@ angular.module('jsbb.angularTicker', [])
         $rootScope.registerTickerTask = function(id, tickHandler, interval, delay, isLinear) {
             TickerSrv.register(id, tickHandler, interval, delay, isLinear);
 
-            this.$on("$destroy", function() {
+            this.$on('$destroy', function() {
                 TickerSrv.unregister(id);
             });
         };
 
         $rootScope.unregisterTickerTask = TickerSrv.unregister;
+
+        $rootScope.$origNew = $rootScope.$new;
+
+        $rootScope.$new = function(isolate, parent) {
+            var newScope = this.$origNew(isolate, parent);
+
+            if (isolate) {
+                newScope.unregisterTickerTask = $rootScope.unregisterTickerTask;
+                newScope.registerTickerTask = $rootScope.registerTickerTask;
+            }
+
+            return newScope;
+        };
     }]);
 ;/**
  * Created by sefi on 5/13/14.
