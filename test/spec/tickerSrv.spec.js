@@ -5,7 +5,7 @@
 
 describe('tickerSrv', function () {
 
-    var tickerSrv, $interval, $q, handlers, scope;
+    var tickerSrv, $interval, $q, handlers, scope, isolatedScope;
 
     beforeEach(module('jsbb.angularTicker'));
     beforeEach(inject(function ($rootScope, TickerSrv, _$interval_, _$q_) {
@@ -14,6 +14,7 @@ describe('tickerSrv', function () {
         $q = _$q_;
 
         scope = $rootScope.$new();
+        isolatedScope = $rootScope.$new(true);
 
         spyOn(tickerSrv, 'register').and.callThrough();
         spyOn(tickerSrv, 'unregister').and.callThrough();
@@ -51,6 +52,7 @@ describe('tickerSrv', function () {
         spyOn(handlers, 'handler4').and.callThrough();
 
         scope.$digest();
+        isolatedScope.$digest();
     }));
 
     describe('sanity', function () {
@@ -210,41 +212,49 @@ describe('tickerSrv', function () {
         it('verify scope is configured', function() {
             expect(scope.registerTickerTask).toBeDefined();
             expect(scope.unregisterTickerTask).toBeDefined();
+
+            expect(isolatedScope.registerTickerTask).toBeDefined();
+            expect(isolatedScope.unregisterTickerTask).toBeDefined();
         });
 
         it('should use scope for registration', function() {
             scope.registerTickerTask('task1', handlers.handler);
+            isolatedScope.registerTickerTask('task2', handlers.handler);
 
             $interval.flush(2001);
-            expect(handlers.handler.calls.count()).toEqual(2);
+            expect(handlers.handler.calls.count()).toEqual(4);
         });
 
         it('should use scope for unregistration', function() {
             scope.registerTickerTask('task1', handlers.handler);
+            isolatedScope.registerTickerTask('task2', handlers.handler);
 
             $interval.flush(2001);
-            expect(handlers.handler.calls.count()).toEqual(2);
+            expect(handlers.handler.calls.count()).toEqual(4);
 
             scope.unregisterTickerTask('task1');
+            isolatedScope.unregisterTickerTask('task2');
 
             $interval.flush(2001);
-            expect(handlers.handler.calls.count()).toEqual(2);
+            expect(handlers.handler.calls.count()).toEqual(4);
         });
 
         it('should stop ticking on scope destroy', function() {
             scope.registerTickerTask('task1', handlers.handler);
+            isolatedScope.registerTickerTask('task2', handlers.handler);
 
             $interval.flush(2001);
-            expect(handlers.handler.calls.count()).toEqual(2);
+            expect(handlers.handler.calls.count()).toEqual(4);
 
             scope.$destroy();
+            isolatedScope.$destroy();
 
             $interval.flush(2001);
-            expect(handlers.handler.calls.count()).toEqual(2);
+            expect(handlers.handler.calls.count()).toEqual(4);
 
             $interval.flush(2001);
-            expect(handlers.handler.calls.count()).toEqual(2);
-        })
+            expect(handlers.handler.calls.count()).toEqual(4);
+        });
     });
 
 });

@@ -192,3 +192,11 @@ angular.module('myModule', ['jsbb.angularTicker'])
         
     });
 ```    
+
+## Version history
+
+> 1.0.9  
+    Add support for auto unregister for isolated scopes
+
+> 1.0.8  
+    Add support for auto unregister
