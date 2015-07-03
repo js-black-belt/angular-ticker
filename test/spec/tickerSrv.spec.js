@@ -256,13 +256,23 @@ describe('tickerSrv', function () {
             expect(handlers.handler.calls.count()).toEqual(4);
         });
 
-        it('should cascade the change to children scope', function(){
-            expect(typeof(scope.$new().registerTickerTask)).toBe('function');
-            expect(typeof(scope.$new(true).registerTickerTask)).toBe('function');
-            expect(typeof(scope.$new(true).$new().registerTickerTask)).toBe('function');
-            expect(typeof(scope.$new(true).$new(true).registerTickerTask)).toBe('function');
-            expect(typeof(scope.$new().$new(true).registerTickerTask)).toBe('function');
-            expect(typeof(scope.$new().$new().registerTickerTask)).toBe('function');
+        it('should test scope inheritance', function() {
+            expect(scope.$new).toBeDefined();
+            expect(scope.registerTickerTask).toBeDefined();
+            expect(isolatedScope.$new).toBeDefined();
+            expect(isolatedScope.registerTickerTask).toBeDefined();
+
+            // new scope from scope
+            expect(scope.$new().registerTickerTask).toBeDefined();
+
+            // new isolated scope from scope
+            expect(scope.$new(true).registerTickerTask).toBeDefined();
+
+            // new scope from isolated scope
+            expect(isolatedScope.$new().registerTickerTask).toBeDefined();
+
+            // new isolated scope from isolated scope
+            expect(isolatedScope.$new(true).registerTickerTask).toBeDefined();
         });
     });
 

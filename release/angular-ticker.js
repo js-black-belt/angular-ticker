@@ -24,31 +24,28 @@ angular.module('jsbb.angularTicker', [])
 
         // since isolated scopes do not inherit prototypically from rootScope, we need to override $new
         // and add the functionality manually.
-        $rootScope.$origNew = $rootScope.$new;
-
-
-        function newNew( me ){
-
-            if ( !me.$origNew ){
-                me.$origNew = me.$new;
+        function applyScopeApi (targetScope) {
+            if (!targetScope.$origNew) {
+                targetScope.$origNew = targetScope.$new;
             }
 
-            return function(isolate,parent){
-                var newScope = me.$origNew(isolate, parent);
+            return function(isolate, parent) {
+                var newScope = targetScope.$origNew(isolate, parent);
 
                 if (isolate) {
                     newScope.unregisterTickerTask = $rootScope.unregisterTickerTask;
                     newScope.registerTickerTask = $rootScope.registerTickerTask;
-
                 }
-                newScope.$new = newNew(newScope);
 
+                newScope.$new = applyScopeApi(newScope);
                 return newScope;
             };
         }
 
-        $rootScope.$new = newNew($rootScope);
-    }]);;/**
+        $rootScope.$new = applyScopeApi($rootScope);
+
+    }]);
+;/**
  * Created by sefi on 5/13/14.
  *
  * related post:
