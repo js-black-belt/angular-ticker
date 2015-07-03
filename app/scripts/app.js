@@ -35,9 +35,9 @@ angular.module('jsbb.angularTicker', [])
                 if (isolate) {
                     newScope.unregisterTickerTask = $rootScope.unregisterTickerTask;
                     newScope.registerTickerTask = $rootScope.registerTickerTask;
+                    newScope.$new = applyScopeApi(newScope);
                 }
 
-                newScope.$new = applyScopeApi(newScope);
                 return newScope;
             };
         }
