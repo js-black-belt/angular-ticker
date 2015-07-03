@@ -26,18 +26,29 @@ angular.module('jsbb.angularTicker', [])
         // and add the functionality manually.
         $rootScope.$origNew = $rootScope.$new;
 
-        $rootScope.$new = function(isolate, parent) {
-            var newScope = this.$origNew(isolate, parent);
 
-            if (isolate) {
-                newScope.unregisterTickerTask = $rootScope.unregisterTickerTask;
-                newScope.registerTickerTask = $rootScope.registerTickerTask;
+        function newNew( me ){
+
+            if ( !me.$origNew ){
+                me.$origNew = me.$new;
             }
 
-            return newScope;
-        };
-    }]);
-;/**
+            return function(isolate,parent){
+                var newScope = me.$origNew(isolate, parent);
+
+                if (isolate) {
+                    newScope.unregisterTickerTask = $rootScope.unregisterTickerTask;
+                    newScope.registerTickerTask = $rootScope.registerTickerTask;
+
+                }
+                newScope.$new = newNew(newScope);
+
+                return newScope;
+            };
+        }
+
+        $rootScope.$new = newNew($rootScope);
+    }]);;/**
  * Created by sefi on 5/13/14.
  *
  * related post:
