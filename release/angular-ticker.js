@@ -40,6 +40,7 @@ angular.module('jsbb.angularTicker', [])
 
                 return newScope;
             };
+
         }
 
         $rootScope.$new = applyScopeApi($rootScope);
