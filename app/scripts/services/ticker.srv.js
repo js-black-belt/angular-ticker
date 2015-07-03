@@ -12,7 +12,7 @@
 
 angular.module('jsbb.angularTicker')
     .provider('TickerSrv', function () {
-        var registrants = {},
+        var tasks = {},
             internalInterval = 1000;
 
         this.setInterval = function (value) {
@@ -28,42 +28,42 @@ angular.module('jsbb.angularTicker')
         };
 
         function TickerSrv($interval) {
-            var resetRegistrantState = function (registrant) {
-                registrant.delay = registrant.interval;
-                registrant.isPending = false;
+            var resetTaskState = function (task) {
+                task.delay = task.interval;
+                task.isPending = false;
             };
 
-            var handleLinearTask = function (registrant) {
-                if (!registrant.isPending) {
-                    registrant.isPending = true;
-                    registrant.tick().then(function () {
-                        resetRegistrantState(registrant);
+            var handleLinearTask = function (task) {
+                if (!task.isPending) {
+                    task.isPending = true;
+                    task.tick().then(function () {
+                        resetTaskState(task);
                     }, function () {
-                        resetRegistrantState(registrant);
+                        resetTaskState(task);
                     });
                 }
             };
 
-            var handleParallelTask = function (registrant) {
-                registrant.tick();
-                resetRegistrantState(registrant);
+            var handleParallelTask = function (task) {
+                task.tick();
+                resetTaskState(task);
             };
 
             var tick = function () {
-                angular.forEach(registrants, function (registrant) {
+                angular.forEach(tasks, function (task) {
                     // update the delay.
-                    registrant.delay -= internalInterval;
+                    task.delay -= internalInterval;
 
-                    if (registrant.delay <= 0) {
+                    if (task.delay <= 0) {
                         // time to tick!
                         try {
-                            if (registrant.isLinear) {
-                                handleLinearTask(registrant);
+                            if (task.isLinear) {
+                                handleLinearTask(task);
                             } else {
-                                handleParallelTask(registrant);
+                                handleParallelTask(task);
                             }
                         } catch (e) {
-                            resetRegistrantState(registrant);
+                            resetTaskState(task);
                             throw e;
                         }
                     }
@@ -108,7 +108,7 @@ angular.module('jsbb.angularTicker')
                     isLinear = true;
                 }
 
-                registrants[id] = {
+                tasks[id] = {
                     id: id,
                     tick: tickHandler,
                     interval: interval,
@@ -126,7 +126,7 @@ angular.module('jsbb.angularTicker')
              *            The task ID
              */
             this.unregister = function (id) {
-                delete registrants[id];
+                delete tasks[id];
             };
 
             /**
@@ -135,7 +135,7 @@ angular.module('jsbb.angularTicker')
              *
              */
             this.unregisterAll = function () {
-                registrants = {};
+                tasks = {};
             };
 
             start();
