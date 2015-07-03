@@ -255,6 +255,15 @@ describe('tickerSrv', function () {
             $interval.flush(2001);
             expect(handlers.handler.calls.count()).toEqual(4);
         });
+
+        it('should cascade the change to children scope', function(){
+            expect(typeof(scope.$new().registerTickerTask)).toBe('function');
+            expect(typeof(scope.$new(true).registerTickerTask)).toBe('function');
+            expect(typeof(scope.$new(true).$new().registerTickerTask)).toBe('function');
+            expect(typeof(scope.$new(true).$new(true).registerTickerTask)).toBe('function');
+            expect(typeof(scope.$new().$new(true).registerTickerTask)).toBe('function');
+            expect(typeof(scope.$new().$new().registerTickerTask)).toBe('function');
+        });
     });
 
 });
