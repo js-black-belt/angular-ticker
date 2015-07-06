@@ -273,6 +273,17 @@ describe('tickerSrv', function () {
 
             // new isolated scope from isolated scope
             expect(isolatedScope.$new(true).registerTickerTask).toBeDefined();
+
+            // more levels of inheritance, to cover all bases...
+            expect(scope.$new().$new().registerTickerTask).toBeDefined();
+            expect(scope.$new().$new(true).registerTickerTask).toBeDefined();
+            expect(scope.$new(true).$new().registerTickerTask).toBeDefined();
+            expect(scope.$new(true).$new(true).registerTickerTask).toBeDefined();
+            expect(isolatedScope.$new(true).$new().registerTickerTask).toBeDefined();
+            expect(isolatedScope.$new(true).$new(true).registerTickerTask).toBeDefined();
+            expect(isolatedScope.$new().$new().registerTickerTask).toBeDefined();
+            expect(isolatedScope.$new().$new(true).registerTickerTask).toBeDefined();
+
         });
     });
 
