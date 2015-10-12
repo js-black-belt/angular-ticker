@@ -195,6 +195,9 @@ angular.module('myModule', ['jsbb.angularTicker'])
 
 ## Version history
 
+> 0.1.11
+    Fix scope API support for ngTransclude
+
 > 0.1.10  
     Add support for auto unregister for isolated scopes created from isolated scopes
 
